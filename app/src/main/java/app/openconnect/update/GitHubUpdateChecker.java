@@ -35,7 +35,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,8 +45,10 @@ public final class GitHubUpdateChecker {
 	public static final String PREF_LAST_VERSION = "update_last_version";
 
 	private static final String TAG = "GitHubUpdateChecker";
+	private static final String REPOSITORY = "Gamei666/OConnect-Flexible";
+	private static final String RELEASES = "https://github.com/" + REPOSITORY + "/releases";
 	private static final String LATEST_RELEASE_API =
-			"https://api.github.com/repos/pengyue-polaron/openconnect-next-android/releases/latest";
+			"https://api.github.com/repos/" + REPOSITORY + "/releases/latest";
 	private static final long AUTOMATIC_CHECK_INTERVAL_MS = 24L * 60L * 60L * 1000L;
 	private static final String PREF_LAST_PROMPTED = "update_last_prompted";
 	private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
@@ -73,15 +74,15 @@ public final class GitHubUpdateChecker {
 		private final String name;
 		private final String notes;
 		private final String releaseUrl;
-		private final String downloadUrl;
+		private final GitHubReleaseAsset apk;
 
 		private Release(String version, String name, String notes,
-				String releaseUrl, String downloadUrl) {
+				String releaseUrl, GitHubReleaseAsset apk) {
 			this.version = version;
 			this.name = name;
 			this.notes = notes;
 			this.releaseUrl = releaseUrl;
-			this.downloadUrl = downloadUrl;
+			this.apk = apk;
 		}
 	}
 
@@ -107,12 +108,6 @@ public final class GitHubUpdateChecker {
 	}
 
 	public static void check(Activity activity, boolean manual, Listener listener) {
-		if (BuildConfig.APPLICATION_ID.equals("app.openconnect.domainsplit")) {
-			String message = activity.getString(R.string.flexible_update_message);
-			if (manual) Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
-			if (listener != null) listener.onFinished(null, new IOException(message));
-			return;
-		}
 		if (!CHECK_IN_PROGRESS.compareAndSet(false, true)) {
 			if (manual && isUsable(activity)) {
 				Toast.makeText(activity, R.string.update_check_already_running,
@@ -190,33 +185,41 @@ public final class GitHubUpdateChecker {
 		connection.setReadTimeout(15000);
 		connection.setRequestProperty("Accept", "application/vnd.github+json");
 		connection.setRequestProperty("X-GitHub-Api-Version", "2022-11-28");
-		connection.setRequestProperty("User-Agent",
-				"OConnect-Android/" + BuildConfig.VERSION_NAME);
+		connection.setRequestProperty("User-Agent", "OConnect-Flexible/" + BuildConfig.VERSION_NAME);
 
-		int status = connection.getResponseCode();
-		InputStream stream = status >= 200 && status < 300
-				? connection.getInputStream() : connection.getErrorStream();
-		String response = readResponse(stream);
-		connection.disconnect();
-		if (status < 200 || status >= 300) {
-			throw new IOException("GitHub returned HTTP " + status);
+		JSONObject json;
+		try {
+			int status = connection.getResponseCode();
+			if (status != HttpURLConnection.HTTP_OK) {
+				throw new IOException("GitHub returned HTTP " + status);
+			}
+			json = new JSONObject(readResponse(connection.getInputStream()));
+		} finally {
+			connection.disconnect();
 		}
-
-		JSONObject json = new JSONObject(response);
 		if (json.optBoolean("draft") || json.optBoolean("prerelease")) {
 			throw new IOException("GitHub latest release is not a stable release");
 		}
 
 		String tagName = json.getString("tag_name");
-		String releaseUrl = json.getString("html_url");
-		String downloadUrl = null;
+		if (!tagName.matches("v[0-9]+\\.[0-9]+\\.[0-9]+(?:-flexible\\.[0-9]+)?")) {
+			throw new IOException("Unexpected GitHub release tag");
+		}
+		String version = tagName.substring(1);
+		String apkName = "OConnect-Flexible-" + version + ".apk";
+		String releaseUrl = RELEASES + "/tag/" + tagName;
+		String downloadUrl = RELEASES + "/download/" + tagName + "/" + apkName;
+		GitHubReleaseAsset apk = null;
 		JSONArray assets = json.optJSONArray("assets");
 		if (assets != null) {
 			for (int index = 0; index < assets.length(); index++) {
 				JSONObject asset = assets.getJSONObject(index);
-				String assetName = asset.optString("name");
-				if (assetName.toLowerCase(Locale.ROOT).endsWith(".apk")) {
-					downloadUrl = asset.optString("browser_download_url", releaseUrl);
+				if (apkName.equals(asset.optString("name")) && "uploaded".equals(asset.optString("state"))) {
+					long size = asset.optLong("size", 0);
+					String digest = asset.optString("digest");
+					if (GitHubReleaseAsset.isSupported(size, digest)) {
+						apk = new GitHubReleaseAsset(version, downloadUrl, size, digest);
+					}
 					break;
 				}
 			}
@@ -227,17 +230,14 @@ public final class GitHubUpdateChecker {
 			releaseName = tagName;
 		}
 		return new Release(
-				tagName,
+				version,
 				releaseName,
 				json.optString("body", ""),
 				releaseUrl,
-				downloadUrl);
+				apk);
 	}
 
 	private static String readResponse(InputStream stream) throws IOException {
-		if (stream == null) {
-			return "";
-		}
 		StringBuilder result = new StringBuilder();
 		try (BufferedReader reader = new BufferedReader(
 				new InputStreamReader(stream, StandardCharsets.UTF_8))) {
@@ -265,12 +265,12 @@ public final class GitHubUpdateChecker {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity)
 				.setTitle(activity.getString(R.string.update_available_title, release.name))
 				.setMessage(message)
-				.setNegativeButton(R.string.update_later, null)
-				.setNeutralButton(R.string.update_view_release,
-						(dialog, which) -> openUrl(activity, release.releaseUrl));
-		if (release.downloadUrl != null && !release.downloadUrl.isEmpty()) {
-			builder.setPositiveButton(R.string.update_download,
-					(dialog, which) -> openUrl(activity, release.downloadUrl));
+				.setNegativeButton(R.string.update_later, null);
+		if (release.apk != null) {
+			builder.setNeutralButton(R.string.update_view_release,
+					(dialog, which) -> openUrl(activity, release.releaseUrl))
+					.setPositiveButton(R.string.update_download,
+							(dialog, which) -> UpdateDownloadActivity.start(activity, release.apk));
 		} else {
 			builder.setPositiveButton(R.string.update_view_release,
 					(dialog, which) -> openUrl(activity, release.releaseUrl));

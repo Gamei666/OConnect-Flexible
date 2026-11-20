@@ -9,6 +9,7 @@
 
 package app.openconnect.update;
 
+import java.math.BigInteger;
 import java.util.Locale;
 
 public final class VersionComparator {
@@ -37,7 +38,28 @@ public final class VersionComparator {
 		if (leftVersion.preRelease == null) {
 			return 0;
 		}
-		return leftVersion.preRelease.compareTo(rightVersion.preRelease);
+		String[] leftIdentifiers = leftVersion.preRelease.split("\\.");
+		String[] rightIdentifiers = rightVersion.preRelease.split("\\.");
+		int identifiers = Math.min(leftIdentifiers.length, rightIdentifiers.length);
+		for (int index = 0; index < identifiers; index++) {
+			int comparison = compareIdentifier(leftIdentifiers[index], rightIdentifiers[index]);
+			if (comparison != 0) {
+				return comparison;
+			}
+		}
+		return Integer.compare(leftIdentifiers.length, rightIdentifiers.length);
+	}
+
+	private static int compareIdentifier(String left, String right) {
+		boolean leftNumeric = left.matches("[0-9]+");
+		boolean rightNumeric = right.matches("[0-9]+");
+		if (leftNumeric && rightNumeric) {
+			return new BigInteger(left).compareTo(new BigInteger(right));
+		}
+		if (leftNumeric != rightNumeric) {
+			return leftNumeric ? -1 : 1;
+		}
+		return left.compareTo(right);
 	}
 
 	private static final class Version {

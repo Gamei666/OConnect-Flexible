@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools" >
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -38,6 +39,10 @@
             android:name="app.openconnect.ConnectionEditorActivity" />
         <activity
             android:name="app.openconnect.FragActivity" />
+        <activity
+            android:name="app.openconnect.update.UpdateDownloadActivity"
+            android:exported="false"
+            android:launchMode="singleTop" />
         <activity
             android:name="app.openconnect.TokenImportActivity"
             android:exported="true" >
@@ -177,6 +182,15 @@
             android:exported="false"
             android:grantUriPermissions="true"
             tools:ignore="ExportedContentProvider" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.updates"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/update_file_paths" />
+        </provider>
 
         <!--
         <receiver android:name="core.GetRestrictionReceiver">

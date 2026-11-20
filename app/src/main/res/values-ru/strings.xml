@@ -291,6 +291,13 @@
   <string name="update_check_failed_title">Не удалось проверить обновления</string>
   <string name="update_checking">Проверка выпусков на GitHub…</string>
   <string name="update_download">Скачать APK</string>
+  <string name="update_downloading">Скачивание и проверка APK с GitHub…</string>
+  <string name="update_install">Установить обновление</string>
+  <string name="update_close">Закрыть</string>
+  <string name="update_ready_to_install">APK проверен и готов к установке.</string>
+  <string name="update_download_failed">Не удалось скачать или проверить APK. Проверьте обновления и попробуйте ещё раз.</string>
+  <string name="update_install_permission_required">Чтобы установить обновление, разрешите OConnect Flexible установку приложений в настройках Android.</string>
+  <string name="update_installer_unavailable">Не удалось открыть установщик Android.</string>
   <string name="update_last_seen">Найдена версия %1$s</string>
   <string name="update_later">Позже</string>
   <string name="update_latest_unknown">Не проверено</string>
@@ -298,7 +305,7 @@
   <string name="update_settings">Обновления</string>
   <string name="update_status_current_summary">Установлена последняя версия %1$s\nПоследняя проверка: %2$s</string>
   <string name="update_status_summary">Установлено: %1$s · Доступно: %2$s\nПоследняя проверка: %3$s</string>
-  <string name="update_up_to_date_message">Установлена последняя стабильная версия OConnect — %1$s.</string>
+  <string name="update_up_to_date_message">Установлена актуальная версия OConnect Flexible %1$s.</string>
   <string name="update_up_to_date_title">Обновлений нет</string>
   <string name="update_view_release">Посмотреть выпуск</string>
   <string name="uptime">Время работы:</string>

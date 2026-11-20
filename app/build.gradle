@@ -11,8 +11,8 @@ android {
         applicationId = "app.openconnect.domainsplit"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1136
-        versionName = "1.17.0-flexible.1"
+        versionCode = 1137
+        versionName = "1.17.0-flexible.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures {
