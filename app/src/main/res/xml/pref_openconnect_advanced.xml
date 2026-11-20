@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Modified for OConnect Flexible. Fork snapshot 2026-11-20. -->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:layout="@layout/preference_category_header" android:title="@string/dynamic_split_title">
+        <Preference android:title="@string/server_split_title" android:summary="@string/server_split_summary"
+            android:layout="@layout/preference_standard_compact" android:selectable="false" />
+        <SwitchPreference android:key="dynamic_split_enabled" android:title="@string/dynamic_split_enable"
+            android:layout="@layout/preference_standard_compact" android:summary="@string/dynamic_split_summary" android:defaultValue="false" />
+        <EditTextPreference android:key="dynamic_split_include" android:title="@string/dynamic_split_include"
+            android:layout="@layout/preference_standard_compact" android:dependency="dynamic_split_enabled"
+            android:dialogMessage="@string/dynamic_split_include_help" android:inputType="textMultiLine|textNoSuggestions" android:defaultValue="" />
+        <EditTextPreference android:key="dynamic_split_exclude" android:title="@string/dynamic_split_exclude"
+            android:layout="@layout/preference_standard_compact" android:dependency="dynamic_split_enabled"
+            android:dialogMessage="@string/dynamic_split_exclude_help" android:inputType="textMultiLine|textNoSuggestions" android:defaultValue="" />
+        <Preference android:title="@string/dynamic_split_limit_title" android:summary="@string/dynamic_split_limit_summary"
+            android:layout="@layout/preference_standard_compact" android:selectable="false" />
+    </PreferenceCategory>
     <PreferenceCategory
         android:layout="@layout/preference_category_header"
         android:title="@string/client_identity">

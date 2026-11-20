@@ -1,1 +1,2 @@
-*.so
+# The four ABI sets are pinned inputs to the APK build.
+!*.so

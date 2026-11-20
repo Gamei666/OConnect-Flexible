@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 pluginManagement {
     repositories {
         google()
@@ -14,5 +15,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = 'OConnectAndroid'
+rootProject.name = 'OConnectFlexible'
 include ':app'

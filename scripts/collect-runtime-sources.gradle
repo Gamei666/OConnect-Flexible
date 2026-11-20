@@ -1,0 +1,40 @@
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.jvm.JvmLibrary
+import org.gradle.language.base.artifact.SourcesArtifact
+
+gradle.projectsEvaluated {
+    def app = rootProject.project(':app')
+    app.tasks.register('collectRuntimeSources') {
+        doLast {
+            def runtime = app.configurations.getByName('releaseRuntimeClasspath')
+            def modules = runtime.incoming.resolutionResult.allComponents.collect { it.id }
+                    .findAll { it instanceof ModuleComponentIdentifier }
+            def sources = app.dependencies.createArtifactResolutionQuery()
+                    .forComponents(modules)
+                    .withArtifacts(JvmLibrary, SourcesArtifact)
+                    .execute()
+
+            sources.components.each { component ->
+                if (component instanceof org.gradle.api.artifacts.result.ComponentArtifactsResult) {
+                    def coords = component.id
+                    def artifacts = component.getArtifacts(SourcesArtifact)
+                    artifacts.each { artifact ->
+                        if (artifact instanceof org.gradle.api.artifacts.result.ResolvedArtifactResult) {
+                            app.copy {
+                                from artifact.file
+                                into rootProject.file("third-party/java-sources/${coords.group}/${coords.module}/${coords.version}")
+                            }
+                        } else {
+                            logger.warn("Unavailable source artifact: ${artifact.id}")
+                        }
+                    }
+                    if (artifacts.isEmpty()) logger.warn("No source artifact: ${coords}")
+                } else {
+                    logger.warn("Source query did not resolve: ${component.id}")
+                }
+            }
+            def coordinates = modules.collect { "${it.group}:${it.module}:${it.version}" }.sort()
+            rootProject.file('third-party/java-sources/runtime-coordinates.txt').text = coordinates.join('\n') + '\n'
+        }
+    }
+}

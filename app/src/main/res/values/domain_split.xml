@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dynamic_split_diagnostics">Dynamic split diagnostics</string>
+    <string name="dynamic_split_diagnostics_summary">Show server policy decisions in Log. Entries can contain matching domain names and destination IP addresses.</string>
+    <string name="dynamic_split_title">VPN by domain</string>
+    <string name="server_split_title">Server domain rules: automatic</string>
+    <string name="server_split_summary">Receives dynamic split include/exclude from ocserv at connection. Server policy takes priority; no local lists are needed.</string>
+    <string name="dynamic_split_enable">Manual fallback rules</string>
+    <string name="dynamic_split_summary">Optional: only used when the server sends no domain policy. Routes included domains through VPN.</string>
+    <string name="dynamic_split_include">Dynamic split include domains</string>
+    <string name="dynamic_split_exclude">Dynamic split exclude domains</string>
+    <string name="dynamic_split_include_help">Example: example.com, internal.example.org. Includes subdomains. Separate names with commas, spaces or newlines. No URLs or ports. At least one include is required.</string>
+    <string name="dynamic_split_exclude_help">Manual fallback exceptions inside include domains. More specific suffix wins; exclude wins ties. Server exclude rules are received automatically and do not use this field.</string>
+    <string name="dynamic_split_limit_title">DNS requirements</string>
+    <string name="dynamic_split_limit_summary">Uses system DNS through the VPN. Private DNS and app-specific encrypted DNS can bypass domain rules. Turn them off for testing. TCP/UDP traffic is supported; this build needs real-device validation.</string>
+</resources>

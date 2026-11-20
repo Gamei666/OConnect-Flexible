@@ -3,6 +3,12 @@
     <PreferenceCategory
             android:layout="@layout/preference_category_header"
             android:title="@string/logging_settings">
+        <SwitchPreference
+                android:defaultValue="false"
+                android:key="dynamic_split_diagnostics"
+                android:layout="@layout/preference_standard_compact"
+                android:summary="@string/dynamic_split_diagnostics_summary"
+                android:title="@string/dynamic_split_diagnostics" />
         <ListPreference
                 android:defaultValue="short"
                 android:dialogTitle="@string/timestamp_format"

@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (c) 2014, Kevin Cernekee
  * All rights reserved.
@@ -62,9 +63,9 @@ public class TokenDiagFragment extends Fragment {
 
 	public static final String TAG = "OConnect";
 
-	public static final String EXTRA_UUID = "io.pengyue.oconnect.UUID";
-	public static final String EXTRA_PIN = "io.pengyue.oconnect.PIN";
-	public static final String EXTRA_PIN_PROMPTED = "io.pengyue.oconnect.PIN_PROMPTED";
+	public static final String EXTRA_UUID = "app.openconnect.domainsplit.UUID";
+	public static final String EXTRA_PIN = "app.openconnect.domainsplit.PIN";
+	public static final String EXTRA_PIN_PROMPTED = "app.openconnect.domainsplit.PIN_PROMPTED";
 
 	private LibStoken mStoken;
 	private TextView mTokencode;

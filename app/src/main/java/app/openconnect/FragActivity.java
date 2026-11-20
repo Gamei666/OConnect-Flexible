@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (c) 2014, Kevin Cernekee
  * All rights reserved.
@@ -32,9 +33,9 @@ public class FragActivity extends ToolbarActivity {
 
 	public static final String TAG = "OConnect";
 
-	public static final String EXTRA_FRAGMENT_NAME = "io.pengyue.oconnect.fragment_name";
+	public static final String EXTRA_FRAGMENT_NAME = "app.openconnect.domainsplit.fragment_name";
 	public static final String EXTRA_OPEN_ADD_PROFILE =
-			"io.pengyue.oconnect.open_add_profile";
+			"app.openconnect.domainsplit.open_add_profile";
 
 	public static final String FRAGMENT_PREFIX = "app.openconnect.fragments.";
 
@@ -82,6 +83,8 @@ public class FragActivity extends ToolbarActivity {
 			return getString(R.string.connection_details_title);
 		} else if ("LogFragment".equals(fragName)) {
 			return getString(R.string.log);
+		} else if ("RoutesFragment".equals(fragName)) {
+			return getString(R.string.routes_title);
 		} else if ("FaqFragment".equals(fragName)) {
 			return getString(R.string.faq);
 		} else if ("VPNProfileList".equals(fragName)) {

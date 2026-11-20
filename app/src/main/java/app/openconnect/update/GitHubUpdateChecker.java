@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (c) 2026 OConnect contributors
  *
@@ -106,6 +107,12 @@ public final class GitHubUpdateChecker {
 	}
 
 	public static void check(Activity activity, boolean manual, Listener listener) {
+		if (BuildConfig.APPLICATION_ID.equals("app.openconnect.domainsplit")) {
+			String message = activity.getString(R.string.flexible_update_message);
+			if (manual) Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
+			if (listener != null) listener.onFinished(null, new IOException(message));
+			return;
+		}
 		if (!CHECK_IN_PROGRESS.compareAndSet(false, true)) {
 			if (manual && isUsable(activity)) {
 				Toast.makeText(activity, R.string.update_check_already_running,

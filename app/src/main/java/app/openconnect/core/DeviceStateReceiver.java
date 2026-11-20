@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (c) 2013, Kevin Cernekee
  * All rights reserved.
@@ -37,7 +38,7 @@ public class DeviceStateReceiver extends BroadcastReceiver {
 
 	public static final String TAG = "OConnect";
 
-	public static final String PREF_CHANGED = "io.pengyue.oconnect.PREF_CHANGED";
+	public static final String PREF_CHANGED = "app.openconnect.domainsplit.PREF_CHANGED";
 
     private OpenVPNManagement mManagement;
 

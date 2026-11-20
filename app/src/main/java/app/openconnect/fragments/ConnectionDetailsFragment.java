@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (c) 2026
  *
@@ -39,6 +40,8 @@ public class ConnectionDetailsFragment extends Fragment {
 		mView = inflater.inflate(R.layout.connection_details, container, false);
 		mView.findViewById(R.id.details_log_row).setOnClickListener(
 				view -> startFragment("LogFragment"));
+		mView.findViewById(R.id.details_routes_row).setOnClickListener(
+				view -> startFragment("RoutesFragment"));
 
 		mConn = new VPNConnector(getActivity(), false) {
 			@Override
@@ -68,7 +71,7 @@ public class ConnectionDetailsFragment extends Fragment {
 				? getString(R.string.dashboard_connected)
 				: state == OpenConnectManagementThread.STATE_DISCONNECTED
 						? getString(R.string.dashboard_disconnected)
-						: service.getConnectionStateName());
+						: getResources().getStringArray(R.array.connection_states)[state]);
 		setNetworkFieldsVisible(connected);
 
 		if (connected && service.startTime != null) {

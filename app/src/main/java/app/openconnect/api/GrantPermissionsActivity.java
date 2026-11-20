@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Adapted from OpenVPN for Android
  * Copyright (c) 2012-2013, Arne Schwabe
@@ -26,19 +27,19 @@
 
 package app.openconnect.api;
 
-import org.acra.ACRA;
-import org.acra.ACRAConfiguration;
-import org.acra.ErrorReporter;
-
 import app.openconnect.R;
+import app.openconnect.AppLanguage;
 import app.openconnect.core.OpenVpnService;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 import androidx.core.content.ContextCompat;
 
 public class GrantPermissionsActivity extends Activity {
@@ -49,15 +50,14 @@ public class GrantPermissionsActivity extends Activity {
 	private String mStartActivity;
 	private static final int REQUEST_POST_NOTIFICATIONS = 1;
 
-	private void reportBadRom(Exception e) {
-		ACRAConfiguration cfg = ACRA.getConfig();
-		cfg.setResDialogText(R.string.bad_rom_text);
-		cfg.setResDialogCommentPrompt(R.string.bad_rom_comment_prompt);
-		ACRA.setConfig(cfg);
+	@Override
+	protected void attachBaseContext(Context base) {
+		super.attachBaseContext(AppLanguage.localize(base));
+	}
 
-		ErrorReporter er = ACRA.getErrorReporter();
-		er.putCustomData("cause", "reportBadRom");
-		er.handleException(e);
+	private void reportBadRom(Exception e) {
+		Log.w("OConnect", "Could not request Android VPN permission", e);
+		Toast.makeText(this, R.string.vpn_permission_failed, Toast.LENGTH_LONG).show();
 	}
 
 	@Override

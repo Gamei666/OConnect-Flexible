@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (C) 2011 The Android Open Source Project
  *
@@ -20,6 +21,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
+import android.content.Context;
 import android.content.DialogInterface.OnShowListener;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -30,6 +32,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import app.openconnect.R;
+import app.openconnect.AppLanguage;
 
 
 public class ConfirmDialog extends Activity implements
@@ -41,6 +44,11 @@ CompoundButton.OnCheckedChangeListener, DialogInterface.OnClickListener {
 	private Button mButton;
 
 	private AlertDialog mAlert;
+
+	@Override
+	protected void attachBaseContext(Context base) {
+		super.attachBaseContext(AppLanguage.localize(base));
+	}
 
 	@Override
 	protected void onResume() {

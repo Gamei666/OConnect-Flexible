@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="permission_label">Управление OConnect Flexible</string>
+    <string name="about_fork_credit">Самостоятельный форк OConnect от pengyue-polaron. Лицензия GNU GPLv2.</string>
+    <string name="about_upstream_source">Исходный код оригинального OConnect</string>
+    <string name="about_upstream_issues">Сообщения об ошибках оригинального OConnect</string>
+    <string name="about_upstream_releases">Выпуски оригинального OConnect</string>
+    <string name="flexible_update_message">Загружайте обновления OConnect Flexible из того же репозитория, где брали эту сборку.</string>
+    <string name="vpn_permission_failed">Android не удалось открыть запрос на разрешение VPN.</string>
+</resources>

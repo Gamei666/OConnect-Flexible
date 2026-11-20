@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Modified for OConnect Flexible. Fork snapshot 2026-11-20. -->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="@string/common_settings">
+        <Preference
+                android:key="app_language"
+                android:layout="@layout/preference_standard_compact"
+                android:persistent="false"
+                android:title="@string/app_language_title" />
+
         <ListPreference
                 android:defaultValue="__last_used__"
                 android:dialogTitle="@string/quick_settings_default_profile"

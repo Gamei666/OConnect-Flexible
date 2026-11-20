@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Adapted from OpenVPN for Android
  * Copyright (c) 2012-2013, Arne Schwabe
@@ -43,7 +44,7 @@ import app.openconnect.R;
 public class AboutFragment extends Fragment  {
 
 	public static final String TAG = "OConnect";
-	private static final String REPO_URL = "https://github.com/pengyue-polaron/openconnect-next-android";
+	private static final String REPO_URL = "https://github.com/pengyue-polaron/oconnect-android";
 	private static final String ISSUES_URL = REPO_URL + "/issues";
 	private static final String RELEASES_URL = REPO_URL + "/releases";
 

@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
+<!-- Modified for OConnect Flexible. Fork snapshot 2026-11-20. -->
 <resources>
-  <string name="app">OConnect</string>
+  <string name="app">OConnect Flexible</string>
   <string name="location">Lloc</string>
   <string name="cancel">Cancel·la</string>
   <string name="no_data">Sense informació</string>

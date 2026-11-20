@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="flexible_icon_background">#171719</color>
+    <string name="permission_label">Control OConnect Flexible</string>
+    <string name="about_fork_credit">Independent fork of OConnect by pengyue-polaron. Licensed under GNU GPLv2.</string>
+    <string name="about_upstream_source">Original OConnect source</string>
+    <string name="about_upstream_issues">Original OConnect issue tracker</string>
+    <string name="about_upstream_releases">Original OConnect releases</string>
+    <string name="flexible_update_message">Download OConnect Flexible updates from the repository where you got this build.</string>
+    <string name="vpn_permission_failed">Android could not open the VPN permission prompt.</string>
+</resources>

@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (c) 2014, Kevin Cernekee
  * All rights reserved.
@@ -48,7 +49,7 @@ import app.openconnect.R;
 public class FeedbackFragment extends Fragment {
 
 	public static final String TAG = "OConnect";
-	public static final String marketURI = "market://details?id=io.pengyue.oconnect";
+	public static final String marketURI = "market://details?id=app.openconnect.domainsplit";
 
 	/* ask for feedback exactly once, after NAGDAYS && NAGUSES */
 	private static final int nagDays = 14;

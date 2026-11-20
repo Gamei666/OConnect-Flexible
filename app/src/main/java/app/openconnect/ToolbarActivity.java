@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (c) 2026
  *
@@ -11,8 +12,10 @@ package app.openconnect;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Build;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +31,25 @@ import com.google.android.material.appbar.MaterialToolbar;
 public class ToolbarActivity extends Activity {
 	protected MaterialToolbar mToolbar;
 	private Fragment mToolbarMenuFragment;
+	private String mLegacyLanguage;
+
+	@Override
+	protected void attachBaseContext(Context base) {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+			mLegacyLanguage = AppLanguage.selectedTag(base);
+			base = AppLanguage.localizeLegacy(base, mLegacyLanguage);
+		}
+		super.attachBaseContext(base);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		// A settings screen can change the locale while this activity is on the back stack.
+		if (mLegacyLanguage != null && !mLegacyLanguage.equals(AppLanguage.selectedTag(this))) {
+			recreate();
+		}
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

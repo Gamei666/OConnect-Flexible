@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Adapted from OpenVPN for Android
  * Copyright (c) 2012-2013, Arne Schwabe
@@ -36,6 +37,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ServiceInfo;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.VpnService;
 import android.os.*;
@@ -43,6 +45,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import androidx.core.app.ServiceCompat;
 import androidx.core.content.ContextCompat;
+import app.openconnect.AppLanguage;
 import app.openconnect.MainActivity;
 import app.openconnect.R;
 import app.openconnect.VpnProfile;
@@ -61,18 +64,19 @@ public class OpenVpnService extends VpnService {
 
 	public static final String TAG = "OConnect";
 
-	public static final String START_SERVICE = "io.pengyue.oconnect.START_SERVICE";
-	public static final String START_SERVICE_STICKY = "io.pengyue.oconnect.START_SERVICE_STICKY";
-	public static final String ALWAYS_SHOW_NOTIFICATION = "io.pengyue.oconnect.NOTIFICATION_ALWAYS_VISIBLE";
+	public static final String START_SERVICE = "app.openconnect.domainsplit.START_SERVICE";
+	public static final String START_SERVICE_STICKY = "app.openconnect.domainsplit.START_SERVICE_STICKY";
+	public static final String ALWAYS_SHOW_NOTIFICATION = "app.openconnect.domainsplit.NOTIFICATION_ALWAYS_VISIBLE";
 
-	public static final String ACTION_VPN_STATUS = "io.pengyue.oconnect.VPN_STATUS";
-	public static final String EXTRA_CONNECTION_STATE = "io.pengyue.oconnect.connectionState";
-	public static final String EXTRA_UUID = "io.pengyue.oconnect.UUID";
+	public static final String ACTION_VPN_STATUS = "app.openconnect.domainsplit.VPN_STATUS";
+	public static final String EXTRA_CONNECTION_STATE = "app.openconnect.domainsplit.connectionState";
+	public static final String EXTRA_UUID = "app.openconnect.domainsplit.UUID";
 	public static final String PREF_NOTIFY_USER_INPUT = "notify_user_input";
 
 	// These are valid in the CONNECTED state
 	public VpnProfile profile;
 	public LibOpenConnect.IPInfo ipInfo;
+	private RoutingDetails mRoutingDetails;
 	public String serverName;
 	public Date startTime;
 
@@ -80,7 +84,10 @@ public class OpenVpnService extends VpnService {
 	private SharedPreferences mPrefs;
 	private final SharedPreferences.OnSharedPreferenceChangeListener mPreferenceListener =
 			(preferences, key) -> {
-				if (PREF_NOTIFY_USER_INPUT.equals(key)) {
+				if (AppLanguage.PREFERENCE.equals(key)) {
+					createNotificationChannel();
+					updateNotification();
+				} else if (PREF_NOTIFY_USER_INPUT.equals(key)) {
 					updateNotification();
 				}
 			};
@@ -105,7 +112,6 @@ public class OpenVpnService extends VpnService {
 	private boolean mForegroundActive;
 
 	private int mConnectionState = OpenConnectManagementThread.STATE_DISCONNECTED;
-	private String mConnectionStateNames[];
 	private VPNStats mStats = new VPNStats();
 
 	private VPNLog mVPNLog = new VPNLog();
@@ -142,8 +148,14 @@ public class OpenVpnService extends VpnService {
 		mUUID = mPrefs.getString(ProfileManager.LAST_USED_PROFILE, "");
 
 		mVPNLog.restoreFromFile(getCacheDir().getAbsolutePath() + "/logdata.ser");
-		mConnectionStateNames = getResources().getStringArray(R.array.connection_states);
 		createNotificationChannel();
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		createNotificationChannel();
+		updateNotification();
 	}
 
 	private void createNotificationChannel() {
@@ -151,17 +163,18 @@ public class OpenVpnService extends VpnService {
 			return;
 		}
 
+		Context text = AppLanguage.localize(this);
 		NotificationChannel connectionChannel = new NotificationChannel(
 				NOTIFICATION_CHANNEL_CONNECTION,
-				getString(R.string.notification_channel_vpn),
+				text.getString(R.string.notification_channel_vpn),
 				NotificationManager.IMPORTANCE_LOW);
-		connectionChannel.setDescription(getString(R.string.notification_touch_here));
+		connectionChannel.setDescription(text.getString(R.string.notification_touch_here));
 
 		NotificationChannel inputChannel = new NotificationChannel(
 				NOTIFICATION_CHANNEL_INPUT,
-				getString(R.string.notification_channel_input),
+				text.getString(R.string.notification_channel_input),
 				NotificationManager.IMPORTANCE_DEFAULT);
-		inputChannel.setDescription(getString(R.string.notification_touch_here));
+		inputChannel.setDescription(text.getString(R.string.notification_touch_here));
 
 		NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		if (manager != null) {
@@ -406,18 +419,19 @@ public class OpenVpnService extends VpnService {
 				? new Notification.Builder(this, channelId)
 				: new Notification.Builder(this);
 
-		String title = getString(R.string.app);
+		Context languageContext = AppLanguage.localize(this);
+		String title = languageContext.getString(R.string.app);
 		String text;
 		if (inputNeeded) {
-			title = getString(R.string.notification_input_needed);
-			text = getString(R.string.notification_touch_here);
+			title = languageContext.getString(R.string.notification_input_needed);
+			text = languageContext.getString(R.string.notification_touch_here);
 		} else if (mConnectionState == OpenConnectManagementThread.STATE_CONNECTED &&
 				profile != null) {
-			text = getString(R.string.notification_connected_to, profile.getName());
+			text = languageContext.getString(R.string.notification_connected_to, profile.getName());
 		} else if (profile != null) {
-			text = getString(R.string.notification_connecting_to, profile.getName());
+			text = languageContext.getString(R.string.notification_connecting_to, profile.getName());
 		} else {
-			text = getString(R.string.notification_vpn_active);
+			text = languageContext.getString(R.string.notification_vpn_active);
 		}
 
 		return builder.setSmallIcon(R.drawable.ic_stat_vpn)
@@ -534,15 +548,14 @@ public class OpenVpnService extends VpnService {
 			startTime = new Date();
 		}
 		mConnectionState = state;
+		if (state == OpenConnectManagementThread.STATE_DISCONNECTED) {
+			mRoutingDetails = null;
+		}
 		wakeUpActivity();
 	}
 
 	public synchronized int getConnectionState() {
 		return mConnectionState;
-	}
-
-	public String getConnectionStateName() {
-		return mConnectionStateNames[getConnectionState()];
 	}
 
 	public void requestStats() {
@@ -566,12 +579,18 @@ public class OpenVpnService extends VpnService {
 	}
 
 	public synchronized void setIPInfo(OpenConnectManagementThread management,
-			LibOpenConnect.IPInfo ipInfo, String serverName) {
+			LibOpenConnect.IPInfo ipInfo, String serverName, RoutingDetails routingDetails) {
 		if (mVPN != management) {
 			return;
 		}
 		this.ipInfo = ipInfo;
 		this.serverName = serverName;
+		mRoutingDetails = routingDetails;
+	}
+
+	public synchronized RoutingDetails getRoutingDetails() {
+		return mConnectionState == OpenConnectManagementThread.STATE_CONNECTED
+				? mRoutingDetails : null;
 	}
 
 	public LogArrayAdapter getArrayAdapter(Context context) {

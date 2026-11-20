@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="routes_title">Routes</string>
+    <string name="routes_disconnected">Connect to a VPN to view its routing rules.</string>
+    <string name="routes_server_rules">Rules received from the server. Each domain rule also covers its subdomains.</string>
+    <string name="routes_profile_rules">Manual rules from the VPN profile. Each domain rule also covers its subdomains.</string>
+    <string name="routes_ip_rules">This connection routes traffic using IP networks.</string>
+    <string name="routes_domain_include">Domains through VPN (include)</string>
+    <string name="routes_domain_exclude">Domains outside VPN (exclude)</string>
+    <string name="routes_network_include">IP networks through VPN</string>
+    <string name="routes_network_exclude">IP networks outside VPN (exclusions)</string>
+    <string name="routes_empty">None</string>
+</resources>

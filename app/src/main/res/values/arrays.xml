@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Modified for OConnect Flexible. Fork snapshot 2026-11-20. -->
 <resources>
 
     <string-array name="software_token_entries">
@@ -42,8 +43,8 @@
 
     <string-array name="split_tunnel_mode_entries">
         <item>Auto</item>
-        <item>On - DNS uses VPN</item>
-        <item>On - DNS uses uplink</item>
+        <item>On · DNS through VPN</item>
+        <item>On · DNS through the underlying network</item>
     </string-array>
     <string-array name="split_tunnel_mode_values" translatable="false">
         <item>auto</item>
@@ -86,7 +87,7 @@
         <item>If Save password stays checked, this profile can reuse the password on later connections. To avoid typing it again, save the password once, then set Automatic login to Use saved credentials when available.</item>
 
         <item>Where do I check connection problems?</item>
-        <item>Open the Log tab. It shows DNS, certificate, authentication, and tunnel setup messages from the current connection attempt. If login fails before the VPN connects, the log usually explains which prompt or server step failed.</item>
+        <item>Open Connection details → Log. It shows DNS, certificate, authentication, and tunnel setup messages from the current connection attempt.</item>
 
         <item>When should I edit certificate or token settings?</item>
         <item>Only edit them when your VPN server requires them. User certificate is for client certificate authentication. Software token is for SecurID or TOTP flows. If your server only asks for username and password, leave these fields empty.</item>

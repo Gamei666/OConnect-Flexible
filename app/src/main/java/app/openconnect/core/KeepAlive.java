@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (c) 2013, Kevin Cernekee
  * All rights reserved.
@@ -45,7 +46,7 @@ public class KeepAlive extends BroadcastReceiver {
 
 	public static final String TAG = "OConnect";
 
-	public static final String ACTION_KEEPALIVE_ALARM = "io.pengyue.oconnect.KEEPALIVE_ALARM";
+	public static final String ACTION_KEEPALIVE_ALARM = "app.openconnect.domainsplit.KEEPALIVE_ALARM";
 
 	private boolean mConnectionActive;
 	private boolean mQueryInFlight;

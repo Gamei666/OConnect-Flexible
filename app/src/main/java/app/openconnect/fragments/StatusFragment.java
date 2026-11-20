@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (c) 2013, Kevin Cernekee
  * All rights reserved.
@@ -149,7 +150,8 @@ public class StatusFragment extends Fragment {
 		setTrafficVisible(true);
 		writeText(R.id.current_profile_label, getString(R.string.dashboard_current_profile));
 		writeProfile(service);
-			writeText(R.id.connection_state, service.getConnectionStateName());
+			writeText(R.id.connection_state,
+					getResources().getStringArray(R.array.connection_states)[mConnectionState]);
 			writeText(R.id.connection_time,
 					getString(R.string.connection_status_progress_message));
 			writeText(R.id.connection_traffic, getServerName(service, mSelectedProfile));

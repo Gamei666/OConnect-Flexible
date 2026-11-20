@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (c) 2014, Kevin Cernekee
  * All rights reserved.
@@ -58,7 +59,7 @@ public class TokenImportActivity extends ToolbarActivity {
 
 	public static final String TAG = "OConnect";
 
-	public static final String EXTRA_UUID = "io.pengyue.oconnect.UUID";
+	public static final String EXTRA_UUID = "app.openconnect.domainsplit.UUID";
 
 	private static final int ALERT_NONE = 0;
 	private static final int ALERT_BAD_TOKEN = 1;

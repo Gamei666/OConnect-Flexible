@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (c) 2013, Kevin Cernekee
  * All rights reserved.
@@ -100,7 +101,7 @@ public class ConnectionEditorFragment extends PreferenceFragment
                 "profile_name", "server_address", "ca_certificate", "user_certificate",
                 "private_key", "software_token", "token_string", "batch_mode",
                 "reported_os", "custom_csd_wrapper", "split_tunnel_mode",
-                "split_tunnel_networks", "dpd_value"
+                "split_tunnel_networks", "dpd_value", "dynamic_split_include", "dynamic_split_exclude"
         }) {
             updatePref(sp, key);
         }
@@ -190,6 +191,18 @@ public class ConnectionEditorFragment extends PreferenceFragment
 			}
 			if (pref instanceof EditTextPreference) {
 				final EditTextPreference etpref = (EditTextPreference)pref;
+				if (key.startsWith("dynamic_split_")) {
+					etpref.setOnPreferenceChangeListener((preference, next) -> {
+						try {
+							String include = key.equals("dynamic_split_include") ? next.toString() : sp.getString("dynamic_split_include", "");
+							String exclude = key.equals("dynamic_split_exclude") ? next.toString() : sp.getString("dynamic_split_exclude", "");
+							if (!include.trim().isEmpty()) new app.openconnect.domains.DomainRules(include, exclude);
+							return true;
+						} catch (IllegalArgumentException e) {
+							Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show(); return false;
+						}
+					});
+				}
 				etpref.getEditText().setOnEditorActionListener(new TextView.OnEditorActionListener() {
 					@Override
 					public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {

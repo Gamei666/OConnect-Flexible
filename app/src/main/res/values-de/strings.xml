@@ -1,7 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
+<!-- Modified for OConnect Flexible. Fork snapshot 2026-11-20. -->
 <resources>
-  <string name="app">OConnect</string>
-  <string name="permission_description">Anderen Anwendungen die Steuerung von OConnect gestatten</string>
+  <string name="app">OConnect Flexible</string>
+  <string name="permission_description">Anderen Anwendungen die Steuerung von OConnect Flexible gestatten</string>
   <string name="location">Ort</string>
   <string name="cant_read_folder">Verzeichnis kann nicht gelesen werden</string>
   <string name="ok">OK</string>
@@ -17,7 +18,7 @@
   <string name="needs_work">Bedarf noch kleiner Verbesserungen</string>
   <string name="maybe_later">Eventuell später</string>
   <string name="help_with_translations">Beim Übersetzen helfen</string>
-  <string name="about_openconnect">Über OConnect</string>
+  <string name="about_openconnect">Über OConnect Flexible</string>
   <string name="securid_none_defined">Keines deiner VPN Profile beinhaltet eine SecurID Schlüsselfolge.\n\nUm eine hinzuzufügen, importiere eine „sdtid“ Datei oder klicke auf Die „http://127.0.0.1/securid“ Adresse in deiner E-Mail. Weitere Infos findest du in den FAQ.</string>
   <string name="securid_parse_error">SecurID Schlüsselfolge dieses Profils konnte nicht verarbeitet werden.</string>
   <string name="securid_internal_error">Auf das VPN Profil konnte nicht zugegriffen werden. Bitte wende dich an den Entwickler und melde diesen Fehler.</string>
@@ -88,7 +89,7 @@
   <string name="send_minidump">Minidump an Entwickler senden</string>
   <string name="send_minidump_summary">Sendet Debugging Informationen des letzten Absturzes an den Entwickler</string>
   <string name="notification_input_needed">Benutzereingabe notwendig</string>
-  <string name="notification_touch_here">Hier berühren um zu OConnect zu gelangen</string>
+  <string name="notification_touch_here">Hier berühren um zu OConnect Flexible zu gelangen</string>
   <string name="state_connected_to">Verbunden mit %1$s</string>
   <string name="error_connection_failed">Verbindung fehlgeschlagen</string>
   <string name="error_invalid_hostname">Ungültiger Hostname \'%1$s\'</string>
@@ -100,7 +101,7 @@
   <string name="make_selection_inline">Ins Profil einbetten</string>
   <string name="add">Hinzufügen</string>
   <string name="prompt">%1$s versucht %2$s zu steuern</string>
-  <string name="remote_warning">Wenn Sie fortfahren, gestatten Sie der App OConnect komplett zu kontrollieren und den gesamten Netzwerkverkehr abzufangen. <b> Akzeptieren Sie nur, wenn Sie der App vertrauen. </b> Anderenfalls riskieren Sie, dass Ihre Daten von schädlicher Software manipuliert werden.</string>
+  <string name="remote_warning">Wenn Sie fortfahren, gestatten Sie der App OConnect Flexible komplett zu kontrollieren und den gesamten Netzwerkverkehr abzufangen. <b> Akzeptieren Sie nur, wenn Sie der App vertrauen. </b> Anderenfalls riskieren Sie, dass Ihre Daten von schädlicher Software manipuliert werden.</string>
   <string name="remote_trust">Ich vertraue dieser App.</string>
   <string name="no_external_app_allowed">Keine App für die Verwendung der API freigegeben</string>
   <string name="allowed_apps">Freigegebene Apps: %s</string>

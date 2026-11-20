@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Adapted from OpenVPN for Android
  * Copyright (c) 2012-2013, Arne Schwabe
@@ -54,10 +55,10 @@ public class FileSelect extends ToolbarActivity {
 	public static final String RESULT_DATA = "RESULT_PATH";
 	public static final String START_DATA = "START_DATA";
 	public static final String WINDOW_TITLE = "WINDOW_TILE";
-	public static final String NO_INLINE_SELECTION = "io.pengyue.oconnect.NO_INLINE_SELECTION";
-	public static final String FORCE_INLINE_SELECTION = "io.pengyue.oconnect.FORCE_INLINE_SELECTION";
-	public static final String SHOW_CLEAR_BUTTON = "io.pengyue.oconnect.SHOW_CLEAR_BUTTON";
-	public static final String DO_BASE64_ENCODE = "io.pengyue.oconnect.BASE64ENCODE";
+	public static final String NO_INLINE_SELECTION = "app.openconnect.domainsplit.NO_INLINE_SELECTION";
+	public static final String FORCE_INLINE_SELECTION = "app.openconnect.domainsplit.FORCE_INLINE_SELECTION";
+	public static final String SHOW_CLEAR_BUTTON = "app.openconnect.domainsplit.SHOW_CLEAR_BUTTON";
+	public static final String DO_BASE64_ENCODE = "app.openconnect.domainsplit.BASE64ENCODE";
 
 	private static final int MAX_FILE_LEN = 32768;
 

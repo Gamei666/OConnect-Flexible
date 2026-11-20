@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (c) 2013, Kevin Cernekee
  * All rights reserved.
@@ -33,8 +34,10 @@ import java.io.Writer;
 import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,6 +60,9 @@ import com.stericson.RootTools.execution.Shell;
 import app.openconnect.AuthFormHandler;
 import app.openconnect.R;
 import app.openconnect.VpnProfile;
+import app.openconnect.domains.DomainRules;
+import app.openconnect.domains.DomainTunnel;
+import app.openconnect.domains.ServerPolicy;
 
 public class OpenConnectManagementThread implements Runnable, OpenVPNManagement {
 
@@ -80,6 +86,9 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 	private String mServerAddr;
 
 	private LibOpenConnect mOC;
+	private DomainRules mDomainRules;
+	private ServerPolicy mServerPolicy;
+	private String mPolicySession;
 	private boolean mAuthgroupSet = false;
 	private String mLastFormDigest;
 	private HashMap<String,Boolean> mAcceptedCerts = new HashMap<String,Boolean>();
@@ -164,6 +173,18 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
     }
 
 	private class AndroidOC extends LibOpenConnect {
+		@Override public void onReconnected() {
+			if (mPolicySession == null) return;
+			try {
+				IPInfo ip = getIPInfo();
+				ServerPolicy next = ServerPolicy.from(ip.CSTPOptions, ip.splitIncludes, ip.splitExcludes,
+						ip.addr != null, ip.netmask6 != null && ip.netmask6.contains("/"));
+				if (!mPolicySession.equals(policySession(next, ip))) {
+					log("DOMAIN: server policy or interface changed; disconnect and reconnect the profile");
+					cancel();
+				}
+			} catch (IllegalArgumentException e) { log("DOMAIN: invalid policy after reconnect"); cancel(); }
+		}
 		private String getPeerCertSHA1() {
 			MessageDigest md;
 			try {
@@ -526,6 +547,10 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 		}
 	}
 
+	private boolean routeDiagnosticsEnabled() {
+		return mAppPrefs.getBoolean("dynamic_split_diagnostics", false);
+	}
+
 	private boolean getSubnetPref(ArrayList<String> subnets) {
 		for (String s : getStringPref("split_tunnel_networks").split("[,\\s]+")) {
 			if (s.equals("")) {
@@ -540,7 +565,8 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 		return true;
 	}
 
-	private void addDefaultRoutes(VpnService.Builder b, LibOpenConnect.IPInfo ip, ArrayList<String> subnets) {
+	private void addDefaultRoutes(VpnService.Builder b, LibOpenConnect.IPInfo ip,
+			List<String> subnets, List<String> applied) {
 		boolean ip4def = true, ip6def = true;
 
 		for (String s : subnets) {
@@ -553,16 +579,18 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 
 		if (ip4def && ip.addr != null) {
 			b.addRoute("0.0.0.0", 0);
+			applied.add("0.0.0.0/0");
 			log("ROUTE: 0.0.0.0/0");
 		}
 
 		if (ip6def && ip.netmask6 != null) {
 			b.addRoute("::", 0);
+			applied.add("::/0");
 			log("ROUTE: ::/0");
 		}
 	}
 
-	private void addSubnetRoutes(VpnService.Builder b, LibOpenConnect.IPInfo ip, ArrayList<String> subnets) {
+	private void addSubnetRoutes(VpnService.Builder b, List<String> subnets, List<String> applied) {
 		for (String s : subnets) {
 			s = s.trim();
 			try {
@@ -570,8 +598,10 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 					String ss[] = s.split("/");
 					if (ss.length == 1) {
 						b.addRoute(ss[0], 128);
+						applied.add(ss[0] + "/128");
 					} else {
 						b.addRoute(ss[0], Integer.parseInt(ss[1]));
+						applied.add(s);
 					}
 					log("ROUTE: " + s);
 				} else {
@@ -582,6 +612,7 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 						cdr = new CIDRIP(s);
 					}
 					b.addRoute(cdr.mIp, cdr.len);
+					applied.add(cdr.mIp + "/" + cdr.len);
 					log("ROUTE: " + cdr.mIp + "/" + cdr.len);
 				}
 			} catch (Exception e) {
@@ -592,6 +623,64 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 
 	private void setIPInfo(VpnService.Builder b) {
 		LibOpenConnect.IPInfo ip = mOC.getIPInfo();
+		List<String> noRules = Collections.emptyList();
+		if (mServerPolicy != null) {
+			if (ip.addr == null || ip.MTU < 1280) throw new IllegalArgumentException("Server domain policy requires IPv4 and VPN MTU >= 1280");
+			b.addAddress(ip.addr, 32);
+			b.addAddress(mServerPolicy.ipv6 ? ip.netmask6.split("/")[0] : "fd42:6f63:6f6e:6e65::1", 128);
+			b.addRoute("0.0.0.0", 0); b.addRoute("::", 0);
+			b.addDnsServer("198.18.0.1");
+			boolean dns = false;
+			for (String resolver : ip.DNS) if (resolver.matches("[0-9.]+")) {
+				if (resolver.equals("198.18.0.1")) throw new IllegalArgumentException("VPN DNS conflicts with the virtual resolver");
+				dns = true;
+			}
+			if (!dns) throw new IllegalArgumentException("Server domain policy requires an IPv4 DNS server from ocserv");
+			b.setMtu(1280); b.setBlocking(true);
+			List<String> routes = new ArrayList<>(ip.splitIncludes);
+			if (mServerPolicy.ipv4 && routes.stream().noneMatch(route -> !route.contains(":"))) {
+				routes.add("0.0.0.0/0");
+			}
+			if (mServerPolicy.ipv6 && routes.stream().noneMatch(route -> route.contains(":"))) {
+				routes.add("::/0");
+			}
+			RoutingDetails details = new RoutingDetails(RoutingDetails.Source.SERVER_DOMAINS,
+					mServerPolicy.includedDomains(), mServerPolicy.excludedDomains(), routes, ip.splitExcludes);
+			mOpenVPNService.setIPInfo(this, ip, mOC.getHostname(), details);
+			return;
+		}
+		if (mDomainRules != null) {
+			if (ip.addr == null || ip.MTU < 1280) {
+				throw new IllegalArgumentException("Domain split requires IPv4 and VPN MTU >= 1280");
+			}
+			b.addAddress(ip.addr, 32);
+			boolean ipv6 = ip.netmask6 != null && ip.netmask6.contains("/");
+			if (ipv6) {
+				b.addAddress(ip.netmask6.split("/")[0], 128);
+				b.addRoute("fd42:6f63:6f6e:6e65::", 96);
+			}
+			b.allowFamily(android.system.OsConstants.AF_INET);
+			b.allowFamily(android.system.OsConstants.AF_INET6);
+			b.addRoute("198.18.0.0", 15);
+			b.addDnsServer("198.18.0.1");
+			boolean dns = false;
+			for (String resolver : ip.DNS) {
+				if (resolver.matches("[0-9.]+")) {
+					if (resolver.startsWith("198.18.") || resolver.startsWith("198.19.")) {
+						throw new IllegalArgumentException("VPN DNS conflicts with the synthetic address range");
+					}
+					b.addRoute(resolver, 32); dns = true;
+				}
+			}
+			if (!dns) throw new IllegalArgumentException("Domain split requires an IPv4 DNS server from ocserv");
+			b.setMtu(1280);
+			b.setBlocking(true);
+			RoutingDetails details = new RoutingDetails(RoutingDetails.Source.PROFILE_DOMAINS,
+					mDomainRules.domains(true), mDomainRules.domains(false), noRules, noRules);
+			mOpenVPNService.setIPInfo(this, ip, mOC.getHostname(), details);
+			log("DOMAIN: domain routing overrides server default/static routes in this profile");
+			return;
+		}
 		CIDRIP cdr;
 		int minMtu = 576;
 
@@ -632,6 +721,7 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 		/* routing */
 
 		ArrayList<String> subnets = new ArrayList<String>(), dns = ip.DNS;
+		List<String> appliedRoutes = new ArrayList<>();
 		String domain = ip.domain;
 
 		if (getStringPref("split_tunnel_mode").equals("on_vpn_dns")) {
@@ -642,9 +732,9 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 			domain = null;
 		} else {
 			subnets = ip.splitIncludes;
-			addDefaultRoutes(b, ip, subnets);
+			addDefaultRoutes(b, ip, subnets, appliedRoutes);
 		}
-		addSubnetRoutes(b, ip, subnets);
+		addSubnetRoutes(b, subnets, appliedRoutes);
 
 		/* DNS */
 
@@ -663,7 +753,9 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 			log("DOMAIN: " + domain);
 		}
 
-		mOpenVPNService.setIPInfo(this, ip, mOC.getHostname());
+		RoutingDetails details = new RoutingDetails(RoutingDetails.Source.IP_ROUTES,
+				noRules, noRules, appliedRoutes, noRules);
+		mOpenVPNService.setIPInfo(this, ip, mOC.getHostname(), details);
 	}
 
 	private void errorAlert(String message) {
@@ -698,8 +790,13 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 		}
 	}
 
+	private static String policySession(ServerPolicy policy, LibOpenConnect.IPInfo ip) {
+		return (policy == null ? "none" : policy.signature()) + "|" + ip.addr + "|" + ip.netmask6 + "|" + ip.DNS;
+	}
+
 	private boolean runVPN() {
 		updateStatPref("attempt");
+		mDomainRules = null; mServerPolicy = null; mPolicySession = null;
 
 		mFilesDir = mContext.getFilesDir().getPath();
 		mCacheDir = mContext.getCacheDir().getPath();
@@ -746,8 +843,26 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 			return false;
 		}
 
+		try {
+			LibOpenConnect.IPInfo ip = mOC.getIPInfo();
+			mServerPolicy = ServerPolicy.from(ip.CSTPOptions, ip.splitIncludes, ip.splitExcludes,
+					ip.addr != null, ip.netmask6 != null && ip.netmask6.contains("/"));
+			if (mServerPolicy != null) mServerPolicy.gateway(mOC.getDNSName(), ip.gatewayAddr);
+			else if (getBoolPref("dynamic_split_enabled")) {
+				mDomainRules = new DomainRules(getStringPref("dynamic_split_include"), getStringPref("dynamic_split_exclude"));
+				mDomainRules.bypassHost(mOC.getDNSName());
+			}
+			if (mServerPolicy == null && routeDiagnosticsEnabled()) {
+				log("SPLIT: no server dynamic split policy received");
+			}
+			// Detect policy changes during native transport reconnection, before continuing traffic.
+			mPolicySession = policySession(mServerPolicy, ip);
+		} catch (IllegalArgumentException e) {
+			log("DOMAIN: " + e.getMessage()); errorAlert(e.getMessage()); return false;
+		}
 		VpnService.Builder b = mOpenVPNService.getVpnServiceBuilder();
-		setIPInfo(b);
+		try { setIPInfo(b); }
+		catch (IllegalArgumentException e) { log("DOMAIN: " + e.getMessage()); errorAlert(e.getMessage()); return false; }
 
 		ParcelFileDescriptor pfd;
 		try {
@@ -757,11 +872,32 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 			return false;
 		}
 
-		if (pfd == null || mOC.setupTunFD(pfd.getFd()) != 0) {
+		DomainTunnel domainTunnel = null;
+		int nativeFd = pfd == null ? -1 : pfd.getFd();
+		if (pfd != null && (mDomainRules != null || mServerPolicy != null)) {
+			try {
+				LibOpenConnect.IPInfo ip = mOC.getIPInfo();
+				Runnable fatal = () -> { synchronized (mMainloopLock) { if (mOC != null) mOC.cancel(); } };
+				File state = new File(mFilesDir, "domain-mappings.txt");
+				if (mServerPolicy != null) domainTunnel = new DomainTunnel(mOpenVPNService, pfd, mServerPolicy,
+						ip.addr, mServerPolicy.ipv6 ? ip.netmask6.split("/")[0] : null, ip.DNS, state, this::log, fatal,
+						this::routeDiagnosticsEnabled);
+				else domainTunnel = new DomainTunnel(mOpenVPNService, pfd, mDomainRules, ip.netmask6 != null && ip.netmask6.contains("/"),
+						ip.DNS, state, this::log, fatal);
+				nativeFd = domainTunnel.detachNativeFd();
+			} catch (Exception e) {
+				try { pfd.close(); } catch (IOException ignored) { }
+				log("DOMAIN: " + e.getMessage()); errorAlert(e.getMessage()); return false;
+			}
+		}
+		if (pfd == null || mOC.setupTunFD(nativeFd) != 0) {
+			if (domainTunnel != null) domainTunnel.close();
 			log("Error setting up tunnel fd");
 			errorAlert();
 			return false;
 		}
+		try {
+		if (domainTunnel != null) domainTunnel.start();
 		setState(STATE_CONNECTED);
 		updateStatPref("connect");
 
@@ -785,11 +921,11 @@ public class OpenConnectManagementThread implements Runnable, OpenVPNManagement 
 			}
 		}
 
-		try {
-			pfd.close();
-		} catch (IOException e) {
-		}
 		return true;
+		} finally {
+			if (domainTunnel != null) domainTunnel.close();
+			else try { pfd.close(); } catch (IOException ignored) { }
+		}
 	}
 
 	public void reconnect() {

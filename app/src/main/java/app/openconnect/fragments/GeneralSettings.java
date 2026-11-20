@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Adapted from OpenVPN for Android
  * Copyright (c) 2012-2013, Arne Schwabe
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import android.content.ComponentName;
@@ -54,6 +56,7 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceFragment;
 import android.service.quicksettings.TileService;
 import android.view.View;
+import app.openconnect.AppLanguage;
 import app.openconnect.BuildConfig;
 import app.openconnect.FragActivity;
 import app.openconnect.PreferenceScreenStyler;
@@ -80,6 +83,7 @@ public class GeneralSettings extends PreferenceFragment
 
 		// Load the preferences from an XML resource
 		addPreferencesFromResource(R.xml.general_settings);
+		configureLanguagePreference();
 		configureQuickSettingsPreference();
 		configureUpdatePreferences();
         configureAdvancedSettings();
@@ -109,6 +113,48 @@ public class GeneralSettings extends PreferenceFragment
 		clearapi.setOnPreferenceClickListener(this);
 		setClearApiSummary();
 		*/
+	}
+
+	private void configureLanguagePreference() {
+		Preference preference = findPreference(AppLanguage.PREFERENCE);
+		preference.setSummary(languageLabel(AppLanguage.selectedTag(getActivity())));
+		preference.setOnPreferenceClickListener(clicked -> {
+			String[] tags = {"", "en", "ru"};
+			CharSequence[] labels = new CharSequence[tags.length];
+			int selected = -1;
+			String current = AppLanguage.selectedTag(getActivity());
+			String currentLanguage = firstLocale(current).getLanguage();
+			for (int i = 0; i < tags.length; i++) {
+				labels[i] = languageLabel(tags[i]);
+				if (tags[i].equals(currentLanguage)) selected = i;
+			}
+			new AlertDialog.Builder(getActivity())
+					.setTitle(R.string.app_language_title)
+					.setSingleChoiceItems(labels, selected, (dialog, which) -> {
+						dialog.dismiss();
+						if (tags[which].equals(current)) return;
+						AppLanguage.select(getActivity(), tags[which]);
+						requestQuickSettingsRefresh();
+						if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) getActivity().recreate();
+					})
+					.setNegativeButton(R.string.cancel, null)
+					.show();
+			return true;
+		});
+	}
+
+	private String languageLabel(String tag) {
+		Locale locale = firstLocale(tag);
+		switch (locale.getLanguage()) {
+			case "en": return getString(R.string.app_language_english);
+			case "ru": return getString(R.string.app_language_russian);
+			case "": return getString(R.string.app_language_system);
+			default: return locale.getDisplayName(locale);
+		}
+	}
+
+	private static Locale firstLocale(String tags) {
+		return Locale.forLanguageTag(tags.split(",", 2)[0]);
 	}
 
 	@Override
@@ -185,6 +231,7 @@ public class GeneralSettings extends PreferenceFragment
     @Override
 	public void onResume() {
         super.onResume();
+        findPreference(AppLanguage.PREFERENCE).setSummary(languageLabel(AppLanguage.selectedTag(getActivity())));
         configureQuickSettingsPreference();
         updateCheckSummary();
         getPreferenceScreen().getSharedPreferences()

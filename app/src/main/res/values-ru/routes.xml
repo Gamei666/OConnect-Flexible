@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="routes_title">Маршруты</string>
+    <string name="routes_disconnected">Подключитесь к VPN, чтобы увидеть правила маршрутизации.</string>
+    <string name="routes_server_rules">Правила получены с сервера. Каждое доменное правило распространяется и на поддомены.</string>
+    <string name="routes_profile_rules">Ручные правила из VPN-профиля. Каждое доменное правило распространяется и на поддомены.</string>
+    <string name="routes_ip_rules">Это подключение использует маршрутизацию по IP-сетям.</string>
+    <string name="routes_domain_include">Домены через VPN (include)</string>
+    <string name="routes_domain_exclude">Домены напрямую (exclude)</string>
+    <string name="routes_network_include">IP-сети через VPN</string>
+    <string name="routes_network_exclude">Исключённые IP-сети</string>
+    <string name="routes_empty">Нет</string>
+</resources>

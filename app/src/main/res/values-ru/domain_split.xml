@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dynamic_split_diagnostics">Диагностика dynamic split</string>
+    <string name="dynamic_split_diagnostics_summary">Показывать решения маршрутизации по правилам сервера в журнале. Записи могут содержать совпавшие домены и IP-адреса назначения.</string>
+    <string name="dynamic_split_title">VPN по доменам</string>
+    <string name="server_split_title">Правила сервера: автоматически</string>
+    <string name="server_split_summary">Получает dynamic split include/exclude от ocserv при подключении. Правила сервера имеют приоритет. Локальные списки заполнять не нужно.</string>
+    <string name="dynamic_split_enable">Резервные ручные правила</string>
+    <string name="dynamic_split_summary">Необязательно. Используются, только если сервер не передал доменную политику. Выбранные домены идут через VPN.</string>
+    <string name="dynamic_split_include">Домены через VPN (include)</string>
+    <string name="dynamic_split_exclude">Исключения (exclude)</string>
+    <string name="dynamic_split_include_help">Например: example.com, internal.example.org. Поддомены включены. Разделяйте запятыми, пробелами или переносами строк. Без URL и портов. Нужен хотя бы один include.</string>
+    <string name="dynamic_split_exclude_help">Исключения для резервных ручных include. Побеждает более конкретный домен; при совпадении — exclude. Серверные exclude принимаются автоматически и не используют это поле.</string>
+    <string name="dynamic_split_limit_title">Требования к DNS</string>
+    <string name="dynamic_split_limit_summary">Используется системный DNS через VPN. Частный DNS и собственный DoH приложений могут обойти правила. Для проверки отключите их. Поддерживается TCP/UDP; эту сборку нужно проверить на телефоне.</string>
+</resources>

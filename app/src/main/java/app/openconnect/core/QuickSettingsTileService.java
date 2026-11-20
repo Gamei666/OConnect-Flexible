@@ -1,3 +1,4 @@
+// Modified for OConnect Flexible. Fork snapshot 2026-11-20.
 /*
  * Copyright (c) 2026 OConnect contributors
  *
@@ -27,6 +28,7 @@ import android.service.quicksettings.TileService;
 
 import androidx.core.content.ContextCompat;
 
+import app.openconnect.AppLanguage;
 import app.openconnect.MainActivity;
 import app.openconnect.R;
 import app.openconnect.VpnProfile;
@@ -56,7 +58,8 @@ public class QuickSettingsTileService extends TileService {
 		@Override
 		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 			if (ProfileManager.QUICK_SETTINGS_PROFILE.equals(key) ||
-					ProfileManager.LAST_USED_PROFILE.equals(key)) {
+					ProfileManager.LAST_USED_PROFILE.equals(key) ||
+					AppLanguage.PREFERENCE.equals(key)) {
 				updateTile();
 			}
 		}
@@ -192,14 +195,15 @@ public class QuickSettingsTileService extends TileService {
 			return;
 		}
 
-		tile.setLabel(getString(R.string.quick_settings_label));
+		Context language = AppLanguage.localize(this);
+		tile.setLabel(language.getString(R.string.quick_settings_label));
 		if (mService == null) {
 			tile.setState(Tile.STATE_INACTIVE);
 			String profileName = getTargetProfileName();
 			if (profileName == null) {
-				setSubtitle(tile, getString(R.string.quick_settings_choose_profile));
+				setSubtitle(tile, language.getString(R.string.quick_settings_choose_profile));
 			} else {
-				setSubtitle(tile, getString(R.string.quick_settings_connect_to, profileName));
+				setSubtitle(tile, language.getString(R.string.quick_settings_connect_to, profileName));
 			}
 		} else {
 			int state = mService.getConnectionState();
@@ -207,30 +211,30 @@ public class QuickSettingsTileService extends TileService {
 			if (state == OpenConnectManagementThread.STATE_DISCONNECTED) {
 				tile.setState(Tile.STATE_INACTIVE);
 				if (profileName == null) {
-					setSubtitle(tile, getString(R.string.quick_settings_choose_profile));
+					setSubtitle(tile, language.getString(R.string.quick_settings_choose_profile));
 				} else {
-					setSubtitle(tile, getString(R.string.quick_settings_connect_to, profileName));
+					setSubtitle(tile, language.getString(R.string.quick_settings_connect_to, profileName));
 				}
 			} else if (state == OpenConnectManagementThread.STATE_CONNECTED) {
 				tile.setState(Tile.STATE_ACTIVE);
 				if (profileName == null) {
-					setSubtitle(tile, getString(R.string.quick_settings_label));
+					setSubtitle(tile, language.getString(R.string.quick_settings_label));
 				} else {
-					setSubtitle(tile, getString(R.string.quick_settings_connected_to, profileName));
+					setSubtitle(tile, language.getString(R.string.quick_settings_connected_to, profileName));
 				}
 			} else if (state == OpenConnectManagementThread.STATE_USER_PROMPT) {
 				tile.setState(Tile.STATE_ACTIVE);
 				if (profileName == null) {
-					setSubtitle(tile, getString(R.string.notification_input_needed));
+					setSubtitle(tile, language.getString(R.string.notification_input_needed));
 				} else {
-					setSubtitle(tile, getString(R.string.quick_settings_action_required, profileName));
+					setSubtitle(tile, language.getString(R.string.quick_settings_action_required, profileName));
 				}
 			} else {
 				tile.setState(Tile.STATE_ACTIVE);
 				if (profileName == null) {
-					setSubtitle(tile, getString(R.string.quick_settings_connecting));
+					setSubtitle(tile, language.getString(R.string.quick_settings_connecting));
 				} else {
-					setSubtitle(tile, getString(R.string.quick_settings_connecting_to, profileName));
+					setSubtitle(tile, language.getString(R.string.quick_settings_connecting_to, profileName));
 				}
 			}
 		}
@@ -243,12 +247,13 @@ public class QuickSettingsTileService extends TileService {
 			return;
 		}
 
-		tile.setLabel(getString(R.string.quick_settings_label));
+		Context language = AppLanguage.localize(this);
+		tile.setLabel(language.getString(R.string.quick_settings_label));
 		tile.setState(Tile.STATE_INACTIVE);
 		if (profileName == null) {
-			setSubtitle(tile, getString(R.string.quick_settings_choose_profile));
+			setSubtitle(tile, language.getString(R.string.quick_settings_choose_profile));
 		} else {
-			setSubtitle(tile, getString(R.string.quick_settings_connect_to, profileName));
+			setSubtitle(tile, language.getString(R.string.quick_settings_connect_to, profileName));
 		}
 		tile.updateTile();
 	}

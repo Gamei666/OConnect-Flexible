@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8"?><config-auth client="vpn" type="complete" aggregate-auth-version="2"><config client="vpn" type="private"><opaque is-for="vpn-client"><custom-attr><dynamic-split-exclude-domains><![CDATA[video.example.com,auth.example.net,news.example.org]]></dynamic-split-exclude-domains></custom-attr></opaque></config></config-auth>
